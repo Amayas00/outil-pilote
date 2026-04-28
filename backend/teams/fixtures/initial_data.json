@@ -1,0 +1,10 @@
+[
+  {"model": "teams.region", "pk": 1, "fields": {"nom": "Ile-de-France"}},
+  {"model": "teams.region", "pk": 2, "fields": {"nom": "Provence-Alpes-Cote d'Azur"}},
+  {"model": "teams.region", "pk": 3, "fields": {"nom": "Auvergne-Rhone-Alpes"}},
+  {"model": "teams.domaine", "pk": 1, "fields": {"nom": "automobile"}},
+  {"model": "teams.domaine", "pk": 2, "fields": {"nom": "construction"}},
+  {"model": "teams.domaine", "pk": 3, "fields": {"nom": "rc"}},
+  {"model": "teams.domaine", "pk": 4, "fields": {"nom": "dommages"}},
+  {"model": "teams.domaine", "pk": 5, "fields": {"nom": "immeuble"}}
+]
