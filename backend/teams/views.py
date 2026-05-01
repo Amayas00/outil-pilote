@@ -84,10 +84,12 @@ class CollaborateurListCreateView(generics.ListCreateAPIView):
             )
         return qs
 
-    def perform_create(self, serializer):
-        """Passe par le service pour initialiser l'historique d'affectation."""
+    def create(self, request, *args, **kwargs):
+        """Override create pour passer par le service et retourner l'instance correcte."""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        creer_collaborateur(
+        instance = creer_collaborateur(
             matricule=data['matricule'],
             nom=data['nom'],
             prenom=data['prenom'],
@@ -95,6 +97,10 @@ class CollaborateurListCreateView(generics.ListCreateAPIView):
             date_entree=data['date_entree'],
             user=data.get('user'),
         )
+        out = CollaborateurDetailSerializer(instance, context={'request': request})
+        from rest_framework import status as drf_status
+        from rest_framework.response import Response
+        return Response(out.data, status=drf_status.HTTP_201_CREATED)
 
 
 class CollaborateurDetailView(generics.RetrieveUpdateAPIView):

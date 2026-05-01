@@ -36,7 +36,7 @@ class PlanningListView(generics.ListAPIView):
 
     def get_queryset(self):
         qs = PlanningEntry.objects.select_related(
-            'collaborateur', 'collaborateur__region', 'collaborateur__equipe',
+            'collaborateur', 'collaborateur__equipe', 'collaborateur__equipe__region',
             'motif', 'created_by'
         )
 
@@ -73,32 +73,47 @@ class PlanningEntryCreateView(APIView):
     """Crée ou met à jour une entrée planning (upsert)."""
 
     def post(self, request):
-        serializer = PlanningEntrySerializer(data=request.data, context={'request': request})
+        # First check if entry already exists to determine the path
+        collab_id    = request.data.get('collaborateur')
+        jour         = request.data.get('jour')
+        demi_journee = request.data.get('demi_journee')
+
+        existing = None
+        if collab_id and jour and demi_journee:
+            existing = PlanningEntry.objects.filter(
+                collaborateur_id=collab_id,
+                jour=jour,
+                demi_journee=demi_journee,
+            ).first()
+
+        # Pass is_upsert_update so serializer skips date validation on UPDATE path
+        ctx = {'request': request, 'is_upsert_update': bool(existing)}
+        serializer = PlanningEntrySerializer(data=request.data, context=ctx)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
         with transaction.atomic():
-            entry, created = PlanningEntry.objects.get_or_create(
-                collaborateur=data['collaborateur'],
-                jour=data['jour'],
-                demi_journee=data['demi_journee'],
-                defaults={
-                    'motif': data['motif'],
-                    'created_by': request.user,
-                    'updated_by': request.user,
-                }
-            )
-            if not created:
-                ancien_motif = entry.motif
-                entry.motif = data['motif']
-                entry.updated_by = request.user
-                entry.save()
-                action = 'UPDATE'
+            if existing:
+                ancien_motif = existing.motif
+                existing.motif = data['motif']
+                existing.updated_by = request.user
+                existing.save()
+                entry   = existing
+                created = False
+                action  = 'UPDATE'
             else:
+                entry = PlanningEntry.objects.create(
+                    collaborateur=data['collaborateur'],
+                    jour=data['jour'],
+                    demi_journee=data['demi_journee'],
+                    motif=data['motif'],
+                    created_by=request.user,
+                    updated_by=request.user,
+                )
                 ancien_motif = None
-                action = 'CREATE'
+                created = True
+                action  = 'CREATE'
 
-            # Historiser la modification
             HistoriqueModification.objects.create(
                 planning_entry=entry,
                 collaborateur=data['collaborateur'],

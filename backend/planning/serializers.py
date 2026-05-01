@@ -28,10 +28,20 @@ class PlanningEntrySerializer(serializers.ModelSerializer):
             'updated_at', 'updated_by',
         ]
         read_only_fields = ['created_at', 'created_by', 'updated_at', 'updated_by']
+        # Disable DRF auto-generated UniqueTogetherValidator — the upsert view
+        # handles the unique constraint manually (create or update existing entry).
+        validators = []
 
     def validate(self, data):
+        """
+        Validation des règles métier.
+        is_upsert_update=True dans le contexte signifie qu'on est dans le path UPDATE
+        de l'upsert — on ne re-valide pas la date (elle est déjà passée lors de la création).
+        """
         request = self.context.get('request')
         user = request.user if request else None
+        is_upsert_update = self.context.get('is_upsert_update', False)
+
         collaborateur = data.get('collaborateur', getattr(self.instance, 'collaborateur', None))
         jour = data.get('jour', getattr(self.instance, 'jour', None))
         motif = data.get('motif', getattr(self.instance, 'motif', None))
@@ -49,8 +59,9 @@ class PlanningEntrySerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "Un collaborateur ne peut modifier que son propre planning."
                 )
-            # Règle : uniquement des jours futurs
-            if jour and jour < date.today():
+            # Règle : uniquement des jours futurs — pas applicable sur un UPDATE upsert
+            # (l'entrée a été créée dans le passé, on met juste à jour le motif)
+            if not is_upsert_update and jour and jour < date.today():
                 raise serializers.ValidationError(
                     "Un collaborateur ne peut modifier que des jours futurs."
                 )
