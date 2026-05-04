@@ -108,10 +108,10 @@ export default function CollaborateursPage() {
   return (
     <div className="p-6 space-y-5 animate-fade-in">
       {/* Page header */}
-      <div className="flex items-center justify-between">
+      <div className="page-head">
         <div>
-          <h2 className="text-xl font-semibold text-ink-1">Collaborateurs</h2>
-          <p className="text-sm text-ink-3 mt-0.5">
+          <h2 className="page-title">Collaborateurs</h2>
+          <p className="page-sub">
             {isLoading ? '…' : `${filtered.length} résultat${filtered.length !== 1 ? 's' : ''}`}
           </p>
         </div>
@@ -176,23 +176,23 @@ export default function CollaborateursPage() {
             {filtered.map(c => (
               <Tr key={c.id}>
                 <Td>
-                  <span className="font-mono text-xs text-ink-3 bg-surface-4 px-1.5 py-0.5 rounded">
+                  <span className="font-mono text-xs text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
                     {c.matricule}
                   </span>
                 </Td>
                 <Td>
                   <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-brand-700/50 flex items-center justify-center shrink-0">
-                      <span className="text-[10px] font-bold text-brand-200">
+                    <div className="w-7 h-7 rounded-full bg-axa-dark/50 flex items-center justify-center shrink-0">
+                      <span className="text-[10px] font-bold text-white">
                         {c.prenom?.[0]}{c.nom?.[0]}
                       </span>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-ink-1">
+                      <p className="text-sm font-medium text-slate-800">
                         {c.prenom} {c.nom}
                       </p>
                       {c.user_email && (
-                        <p className="text-xs text-ink-4">{c.user_email}</p>
+                        <p className="text-xs text-slate-300">{c.user_email}</p>
                       )}
                     </div>
                   </div>
@@ -295,12 +295,12 @@ export default function CollaborateursPage() {
       {toast && (
         <div className={clsx(
           'fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3',
-          'rounded-lg border shadow-card-lg animate-slide-up text-sm',
+          'rounded-lg border shadow-lg animate-slide-up text-sm',
           toast.type === 'success'
-            ? 'bg-surface-2 border-green-500/30 text-green-300'
-            : 'bg-surface-2 border-red-500/30 text-red-300'
+            ? 'bg-white border-success-border text-success shadow-md font-medium'
+            : 'bg-white border-danger-border text-danger shadow-md font-medium'
         )}>
-          <span className={clsx('w-2 h-2 rounded-full', toast.type === 'success' ? 'bg-green-400' : 'bg-red-400')} />
+          <span className={clsx('w-2 h-2 rounded-full', toast.type === 'success' ? 'bg-success' : 'bg-danger')} />
           {toast.message}
         </div>
       )}
@@ -318,14 +318,14 @@ function apiError(err) {
 
 function ErrorState() {
   return (
-    <div className="flex flex-col items-center justify-center py-16 gap-3 bg-surface-2 border border-surface-5/60 rounded-lg">
+    <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white border border-slate-200/60 rounded-lg">
       <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
         <svg className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
         </svg>
       </div>
-      <p className="text-sm font-medium text-ink-2">Erreur de chargement</p>
-      <p className="text-xs text-ink-4">Vérifiez que le backend est démarré</p>
+      <p className="text-sm font-medium text-slate-600">Erreur de chargement</p>
+      <p className="text-xs text-slate-300">Vérifiez que le backend est démarré</p>
     </div>
   )
 }

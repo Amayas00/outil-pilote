@@ -54,7 +54,7 @@ export default function CollaborateurForm({ initial, onSubmit, onCancel, loading
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <fieldset className="space-y-4">
-        <legend className="text-xs font-semibold text-ink-3 uppercase tracking-wider pb-2 border-b border-surface-5/60 w-full">Identité</legend>
+        <legend className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pb-2 border-b border-slate-150 w-full">Identité</legend>
         <div className="grid grid-cols-2 gap-4">
           <Input label="Prénom *" value={form.prenom} onChange={set('prenom')} error={errors.prenom} placeholder="Jean" />
           <Input label="Nom *"    value={form.nom}    onChange={set('nom')}    error={errors.nom}    placeholder="DUPONT" />
@@ -63,7 +63,7 @@ export default function CollaborateurForm({ initial, onSubmit, onCancel, loading
       </fieldset>
 
       <fieldset className="space-y-4">
-        <legend className="text-xs font-semibold text-ink-3 uppercase tracking-wider pb-2 border-b border-surface-5/60 w-full">Affectation</legend>
+        <legend className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pb-2 border-b border-slate-150 w-full">Affectation</legend>
         <Select label="Région (filtre)" value={regionFilter} onChange={e => { setRegionFilter(e.target.value); setForm(f => ({ ...f, equipe: '' })) }}>
           <option value="">Toutes les régions</option>
           {regions.map(r => <option key={r.id} value={r.id}>{r.nom}</option>)}
@@ -75,7 +75,7 @@ export default function CollaborateurForm({ initial, onSubmit, onCancel, loading
       </fieldset>
 
       <fieldset className="space-y-4">
-        <legend className="text-xs font-semibold text-ink-3 uppercase tracking-wider pb-2 border-b border-surface-5/60 w-full">Période</legend>
+        <legend className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pb-2 border-b border-slate-150 w-full">Période</legend>
         <div className="grid grid-cols-2 gap-4">
           <Input type="date" label="Date d'entrée *" value={form.date_entree} onChange={set('date_entree')} error={errors.date_entree} />
           <Input type="date" label="Date de sortie"  value={form.date_sortie} onChange={set('date_sortie')} error={errors.date_sortie} hint="Vide si en poste" />
@@ -84,10 +84,10 @@ export default function CollaborateurForm({ initial, onSubmit, onCancel, loading
           <label className="flex items-center gap-2.5 cursor-pointer group">
             <div className="relative">
               <input type="checkbox" checked={form.actif} onChange={set('actif')} className="sr-only peer" />
-              <div className="w-9 h-5 bg-surface-5 rounded-full peer-checked:bg-brand-600 transition-colors" />
+              <div className="w-9 h-5 bg-slate-200 rounded-full peer-checked:bg-axa transition-colors" />
               <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4" />
             </div>
-            <span className="text-sm text-ink-2 group-hover:text-ink-1 transition-colors">Collaborateur actif</span>
+            <span className="text-sm text-slate-600 group-hover:text-slate-800 transition-colors">Collaborateur actif</span>
           </label>
         )}
       </fieldset>

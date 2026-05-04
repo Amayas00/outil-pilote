@@ -35,8 +35,8 @@ function useToast() {
 }
 
 const TYPE_STYLE = {
-  ferie: { variant: 'danger',  label: 'Férié',  dot: 'bg-red-400'   },
-  pont:  { variant: 'warning', label: 'Pont',   dot: 'bg-amber-400' },
+  ferie: { variant: 'danger',  label: 'Férié national',  dot: 'bg-danger'   },
+  pont:  { variant: 'warning', label: 'Pont',   dot: 'bg-warning' },
 }
 
 // Generate year options: current year ± 3
@@ -115,10 +115,10 @@ export default function JoursFeriesPage() {
     <div className="p-6 space-y-5 animate-fade-in">
 
       {/* ── Header ── */}
-      <div className="flex items-center justify-between">
+      <div className="page-head">
         <div>
-          <h2 className="text-xl font-semibold text-ink-1">Jours fériés & Ponts</h2>
-          <p className="text-sm text-ink-3 mt-0.5">
+          <h2 className="page-title">Jours fériés & Ponts</h2>
+          <p className="page-sub">
             {isLoading ? '…' : `${stats.total} entrée${stats.total !== 1 ? 's' : ''} pour ${annee}`}
           </p>
         </div>
@@ -131,12 +131,12 @@ export default function JoursFeriesPage() {
       {!isLoading && (
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Total',         value: stats.total,  color: 'text-ink-1',       bg: 'bg-surface-3'        },
-            { label: 'Jours fériés',  value: stats.feries, color: 'text-red-300',     bg: 'bg-red-500/10'       },
-            { label: 'Ponts',         value: stats.ponts,  color: 'text-amber-300',   bg: 'bg-amber-500/10'     },
+            { label: 'Total',         value: stats.total,  color: 'text-slate-800',       bg: 'bg-white border border-slate-150' },
+            { label: 'Jours fériés',  value: stats.feries, color: 'text-danger',       bg: 'bg-danger-light border border-danger-border' },
+            { label: 'Ponts',         value: stats.ponts,  color: 'text-warning',     bg: 'bg-warning-light border border-warning-border' },
           ].map(s => (
-            <div key={s.label} className={clsx('rounded-lg p-3 border border-surface-5/60 flex items-center justify-between', s.bg)}>
-              <span className="text-xs text-ink-3">{s.label}</span>
+            <div key={s.label} className={clsx('rounded-lg p-3 flex items-center justify-between shadow-xs', s.bg)}>
+              <span className="text-xs text-slate-400">{s.label}</span>
               <span className={clsx('text-2xl font-bold font-mono', s.color)}>{s.value}</span>
             </div>
           ))}
@@ -167,7 +167,7 @@ export default function JoursFeriesPage() {
         )}
 
         {/* View toggle */}
-        <div className="ml-auto flex items-center gap-1 bg-surface-3 border border-surface-5/60 rounded-md p-0.5">
+        <div className="ml-auto flex items-center gap-1 bg-slate-50 border border-slate-200/60 rounded-md p-0.5">
           {[
             { key: 'table',    icon: <TableIcon />    },
             { key: 'calendar', icon: <CalendarIcon /> },
@@ -178,8 +178,8 @@ export default function JoursFeriesPage() {
               className={clsx(
                 'p-1.5 rounded transition-all duration-150',
                 viewMode === v.key
-                  ? 'bg-surface-0 text-ink-1 shadow-card'
-                  : 'text-ink-4 hover:text-ink-2'
+                  ? 'bg-white text-axa shadow-xs'
+                  : 'text-slate-400 hover:text-slate-800'
               )}
             >
               {v.icon}
@@ -256,12 +256,12 @@ export default function JoursFeriesPage() {
       {toast && (
         <div className={clsx(
           'fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3',
-          'rounded-lg border shadow-card-lg animate-slide-up text-sm',
+          'rounded-lg border shadow-lg animate-slide-up text-sm',
           toast.type === 'success'
-            ? 'bg-surface-2 border-green-500/30 text-green-300'
-            : 'bg-surface-2 border-red-500/30 text-red-300'
+            ? 'bg-white border-success-border text-success shadow-md font-medium'
+            : 'bg-white border-danger-border text-danger shadow-md font-medium'
         )}>
-          <span className={clsx('w-2 h-2 rounded-full', toast.type === 'success' ? 'bg-green-400' : 'bg-red-400')} />
+          <span className={clsx('w-2 h-2 rounded-full', toast.type === 'success' ? 'bg-success' : 'bg-danger')} />
           {toast.message}
         </div>
       )}
@@ -287,27 +287,27 @@ function TableView({ jours, onEdit, onDelete }) {
             <Tr key={j.id}>
               <Td>
                 <div className="flex flex-col">
-                  <span className="font-mono text-sm font-medium text-ink-1">
+                  <span className="font-mono text-sm font-medium text-slate-800">
                     {format(parseISO(j.jour), 'dd MMM yyyy', { locale: fr })}
                   </span>
-                  <span className="text-[10px] text-ink-4 font-mono">
+                  <span className="text-[10px] text-slate-300 font-mono">
                     {format(parseISO(j.jour), 'EEEE', { locale: fr })}
                   </span>
                 </div>
               </Td>
               <Td>
-                <span className="font-medium text-ink-1">{j.libelle}</span>
+                <span className="font-medium text-slate-800">{j.libelle}</span>
               </Td>
               <Td>
                 <Badge variant={ts.variant} dot={ts.dot}>{ts.label}</Badge>
               </Td>
               <Td>
                 {j.toutes_regions
-                  ? <span className="text-xs text-ink-3 italic">Toutes les régions</span>
+                  ? <span className="text-xs text-slate-400 italic">Toutes les régions</span>
                   : (
                     <div className="flex flex-wrap gap-1">
                       {(j.regions_noms ?? []).map(nom => (
-                        <span key={nom} className="px-1.5 py-0.5 bg-surface-4 rounded text-xs text-ink-2">{nom}</span>
+                        <span key={nom} className="px-1.5 py-0.5 bg-slate-100 rounded text-xs text-slate-600">{nom}</span>
                       ))}
                     </div>
                   )
@@ -337,10 +337,10 @@ function CalendarView({ jours, onEdit, onDelete }) {
   return (
     <div className="space-y-4">
       {groups.map(([month, items]) => (
-        <div key={month} className="bg-surface-2 border border-surface-5/60 rounded-lg overflow-hidden">
+        <div key={month} className="bg-white border border-slate-200/60 rounded-lg overflow-hidden">
           {/* Month header */}
-          <div className="px-4 py-2.5 bg-surface-0 border-b border-surface-5/60 flex items-center justify-between">
-            <span className="text-sm font-semibold text-ink-1 capitalize">
+          <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200/60 flex items-center justify-between">
+            <span className="text-sm font-semibold text-white capitalize">
               {format(parseISO(month + '-01'), 'MMMM yyyy', { locale: fr })}
             </span>
             <Badge variant="default">{items.length} jour{items.length > 1 ? 's' : ''}</Badge>
@@ -352,7 +352,7 @@ function CalendarView({ jours, onEdit, onDelete }) {
               const ts = TYPE_STYLE[j.type] ?? TYPE_STYLE.ferie
               return (
                 <div key={j.id}
-                  className="flex items-center gap-4 px-4 py-3 hover:bg-surface-3 transition-colors group">
+                  className="flex items-center gap-4 px-4 py-3 hover:bg-slate-50 transition-colors group">
 
                   {/* Day number bubble */}
                   <div className={clsx(
@@ -362,7 +362,7 @@ function CalendarView({ jours, onEdit, onDelete }) {
                       : 'bg-amber-500/10 border-amber-500/20'
                   )}>
                     <span className={clsx('text-lg font-bold leading-none font-mono',
-                      j.type === 'ferie' ? 'text-red-300' : 'text-amber-300'
+                      j.type === 'ferie' ? 'text-red-300' : 'text-warning'
                     )}>
                       {format(parseISO(j.jour), 'd')}
                     </span>
@@ -375,10 +375,10 @@ function CalendarView({ jours, onEdit, onDelete }) {
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-ink-1">{j.libelle}</p>
+                    <p className="text-sm font-medium text-slate-800">{j.libelle}</p>
                     <div className="flex items-center gap-2 mt-0.5">
                       <Badge variant={ts.variant} dot={ts.dot} className="text-[10px]">{ts.label}</Badge>
-                      <span className="text-[10px] text-ink-4">
+                      <span className="text-[10px] text-slate-300">
                         {j.toutes_regions ? 'Toutes les régions' : (j.regions_noms ?? []).join(', ')}
                       </span>
                     </div>
@@ -388,13 +388,13 @@ function CalendarView({ jours, onEdit, onDelete }) {
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                     <button
                       onClick={() => onEdit(j)}
-                      className="p-1.5 rounded-md text-ink-3 hover:text-ink-1 hover:bg-surface-4 transition-colors"
+                      className="p-1.5 rounded-md text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors"
                     >
                       <EditIcon />
                     </button>
                     <button
                       onClick={() => onDelete(j)}
-                      className="p-1.5 rounded-md text-ink-3 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                      className="p-1.5 rounded-md text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                     >
                       <TrashIcon />
                     </button>
@@ -412,9 +412,9 @@ function CalendarView({ jours, onEdit, onDelete }) {
 // ── Sub-components ────────────────────────────────────────────────────────────
 function ErrorState() {
   return (
-    <div className="flex flex-col items-center justify-center py-16 gap-3 bg-surface-2 border border-surface-5/60 rounded-lg">
-      <p className="text-sm font-medium text-ink-2">Erreur de chargement</p>
-      <p className="text-xs text-ink-4">Vérifiez que le backend est démarré</p>
+    <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white border border-slate-200/60 rounded-lg">
+      <p className="text-sm font-medium text-slate-600">Erreur de chargement</p>
+      <p className="text-xs text-slate-300">Vérifiez que le backend est démarré</p>
     </div>
   )
 }

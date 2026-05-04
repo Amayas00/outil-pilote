@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { format, startOfWeek, addWeeks } from 'date-fns'
+import { format, startOfWeek, addWeeks, subWeeks } from 'date-fns'
 import { planningService, teamsService, calendarService } from '../services/api'
 import { buildWeekRange, indexEntries } from '../utils/planning'
 import { useAuth } from '../context/AuthContext'
@@ -121,22 +121,41 @@ export default function PlanningPage() {
   const handleFilterChange = (patch) => setFilters(prev => ({ ...prev, ...patch }))
   const handleFilterReset  = () => setFilters(DEFAULT_FILTERS)
 
+  const goToPrev = () => {
+    setFilters(prev => ({
+      ...prev,
+      startDate: format(subWeeks(new Date(prev.startDate), prev.nbWeeks), 'yyyy-MM-dd')
+    }))
+  }
+  const goToNext = () => {
+    setFilters(prev => ({
+      ...prev,
+      startDate: format(addWeeks(new Date(prev.startDate), prev.nbWeeks), 'yyyy-MM-dd')
+    }))
+  }
+  const goToToday = () => {
+    setFilters(prev => ({
+      ...prev,
+      startDate: format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd')
+    }))
+  }
+
   const isLoading = loadingCollabs || loadingEntries
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header bar */}
-      <div className="px-6 py-4 border-b border-surface-5/60 bg-surface-1 shrink-0">
+      <div className="px-6 py-4 border-b border-slate-200/60 bg-white shrink-0">
         <div className="flex items-center justify-between gap-4 mb-3">
           <div className="flex items-center gap-3">
-            <h2 className="text-base font-semibold text-ink-1">Planning</h2>
-            <Badge variant="default" className="font-mono text-[10px]">
+            <h2 className="text-base font-semibold text-slate-900">Planning</h2>
+            <Badge variant="outline" className="font-mono text-2xs">
               {filters.nbWeeks} sem · {collaborateurs.length} collab.
             </Badge>
             {upsertMutation.isPending && (
-              <div className="flex items-center gap-1.5 text-xs text-ink-3">
-                <span className="w-3 h-3 border border-brand-500 border-t-transparent rounded-full animate-spin" />
+              <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                <span className="w-3 h-3 border border-axa border-t-transparent rounded-full animate-spin" />
                 Sauvegarde…
               </div>
             )}
@@ -187,10 +206,10 @@ export default function PlanningPage() {
       {notification && (
         <div className={`
           fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3
-          rounded-lg border shadow-card-lg animate-slide-up
+          rounded-lg border shadow-lg animate-slide-up
           ${notification.type === 'success'
-            ? 'bg-surface-2 border-green-500/30 text-green-300'
-            : 'bg-surface-2 border-red-500/30 text-red-300'}
+            ? 'bg-white border-success-border text-success shadow-md'
+            : 'bg-white border-danger-border text-danger shadow-md'}
         `}>
           <span className={`w-2 h-2 rounded-full ${notification.type === 'success' ? 'bg-green-400' : 'bg-red-400'}`} />
           <span className="text-sm">{notification.message}</span>

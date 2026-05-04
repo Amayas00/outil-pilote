@@ -1,13 +1,9 @@
 import clsx from 'clsx'
-
-export default function Card({ children, className, hover = false, padding = true }) {
+export default function Card({ children, className, hover, padding = true }) {
   return (
-    <div className={clsx(
-      'bg-surface-2 border border-surface-5/60 rounded-lg shadow-card',
-      padding && 'p-4',
-      hover && 'transition-all duration-200 hover:bg-surface-3 hover:border-surface-5 hover:shadow-card-md cursor-pointer',
-      className
-    )}>
+    <div className={clsx('card', padding && 'p-5',
+      hover && 'cursor-pointer hover:shadow hover:border-slate-200 transition-all duration-120',
+      className)}>
       {children}
     </div>
   )

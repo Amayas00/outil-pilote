@@ -20,8 +20,12 @@ const queryClient = new QueryClient({
 function RequireAuth({ children }) {
   const { user, loading } = useAuth()
   if (loading) return (
-    <div className="min-h-screen bg-surface-0 flex items-center justify-center">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
+      <div className="bg-axa px-5 py-2.5 rounded mb-2">
+        <span className="text-white font-black text-2xl tracking-tight">AXA</span>
+      </div>
       <Spinner size="lg" />
+      <p className="text-xs text-slate-400 font-medium">Chargement…</p>
     </div>
   )
   return user ? children : <Navigate to="/login" replace />

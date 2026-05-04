@@ -17,10 +17,10 @@ import EquipeForm from '../components/equipes/EquipeForm'
 
 const DOMAINE_COLORS = {
   automobile:  { bg: 'bg-blue-500/15',   text: 'text-blue-300'   },
-  construction:{ bg: 'bg-amber-500/15',  text: 'text-amber-300'  },
+  construction:{ bg: 'bg-amber-500/15',  text: 'text-warning'  },
   rc:          { bg: 'bg-purple-500/15', text: 'text-purple-300' },
   dommages:    { bg: 'bg-red-500/15',    text: 'text-red-300'    },
-  immeuble:    { bg: 'bg-green-500/15',  text: 'text-green-300'  },
+  immeuble:    { bg: 'bg-green-500/15',  text: 'text-success'  },
 }
 
 function useToast() {
@@ -117,10 +117,10 @@ export default function EquipesPage() {
   return (
     <div className="p-6 space-y-5 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="page-head">
         <div>
-          <h2 className="text-xl font-semibold text-ink-1">Équipes</h2>
-          <p className="text-sm text-ink-3 mt-0.5">
+          <h2 className="page-title">Équipes</h2>
+          <p className="page-sub">
             {isLoading ? '…' : `${filtered.length} équipe${filtered.length !== 1 ? 's' : ''}`}
           </p>
         </div>
@@ -133,13 +133,13 @@ export default function EquipesPage() {
       {!isLoading && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: 'Équipes actives',   value: equipes.filter(e => e.active).length,    color: 'text-green-300'  },
-            { label: 'Équipes inactives', value: equipes.filter(e => !e.active).length,   color: 'text-ink-3'      },
-            { label: 'Régions',           value: regions.length,                           color: 'text-brand-300'  },
-            { label: 'Domaines',          value: domaines.length,                          color: 'text-amber-300'  },
+            { label: 'Équipes actives',   value: equipes.filter(e => e.active).length,    color: 'text-success'  },
+            { label: 'Équipes inactives', value: equipes.filter(e => !e.active).length,   color: 'text-slate-400'      },
+            { label: 'Régions',           value: regions.length,                           color: 'text-axa'  },
+            { label: 'Domaines',          value: domaines.length,                          color: 'text-warning'  },
           ].map(s => (
-            <div key={s.label} className="bg-surface-2 border border-surface-5/60 rounded-lg p-3 flex items-center justify-between">
-              <span className="text-xs text-ink-3">{s.label}</span>
+            <div key={s.label} className="bg-white border border-slate-200/60 rounded-lg p-3 flex items-center justify-between">
+              <span className="text-xs text-slate-400">{s.label}</span>
               <span className={clsx('text-xl font-bold font-mono', s.color)}>{s.value}</span>
             </div>
           ))}
@@ -173,8 +173,8 @@ export default function EquipesPage() {
       {isLoading ? (
         <TableSkeleton cols={5} rows={6} />
       ) : isError ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 bg-surface-2 border border-surface-5/60 rounded-lg">
-          <p className="text-sm text-ink-2">Erreur de chargement — vérifiez que le backend est démarré</p>
+        <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white border border-slate-200/60 rounded-lg">
+          <p className="text-sm text-slate-600">Erreur de chargement — vérifiez que le backend est démarré</p>
         </div>
       ) : filtered.length === 0 ? (
         <TableEmpty message="Aucune équipe trouvée" hint="Créez une première équipe pour commencer" icon={<GridIcon />} />
@@ -199,7 +199,7 @@ export default function EquipesPage() {
                       <div className={clsx('w-7 h-7 rounded-md flex items-center justify-center shrink-0', dc.bg)}>
                         <GridIcon className={clsx('w-3.5 h-3.5', dc.text)} />
                       </div>
-                      <span className="font-medium text-ink-1">{equipe.nom}</span>
+                      <span className="font-medium text-slate-800">{equipe.nom}</span>
                     </div>
                   </Td>
                   <Td muted>{equipe.region_nom}</Td>
@@ -210,16 +210,16 @@ export default function EquipesPage() {
                   </Td>
                   <Td>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-sm font-mono font-medium text-ink-1">{nb}</span>
-                      <span className="text-xs text-ink-4">collab.</span>
+                      <span className="text-sm font-mono font-medium text-slate-800">{nb}</span>
+                      <span className="text-xs text-slate-300">collab.</span>
                       {nb > 0 && (
                         <div className="flex -space-x-1 ml-1">
                           {Array.from({ length: Math.min(nb, 3) }).map((_, i) => (
-                            <div key={i} className="w-5 h-5 rounded-full bg-brand-700/60 border border-surface-2 flex items-center justify-center">
-                              <span className="text-[7px] font-bold text-brand-200">{i+1}</span>
+                            <div key={i} className="w-5 h-5 rounded-full bg-axa-dark/60 border border-surface-2 flex items-center justify-center">
+                              <span className="text-[7px] font-bold text-white">{i+1}</span>
                             </div>
                           ))}
-                          {nb > 3 && <div className="w-5 h-5 rounded-full bg-surface-4 border border-surface-2 flex items-center justify-center text-[8px] text-ink-3">+{nb-3}</div>}
+                          {nb > 3 && <div className="w-5 h-5 rounded-full bg-slate-100 border border-surface-2 flex items-center justify-center text-[8px] text-slate-400">+{nb-3}</div>}
                         </div>
                       )}
                     </div>
@@ -271,19 +271,19 @@ export default function EquipesPage() {
               <InfoItem label="Statut"   value={detailEquipe.active ? 'Active' : 'Inactive'} />
               <InfoItem label="Membres"  value={`${collabCount[detailEquipe.id] || 0} collaborateur(s)`} />
             </div>
-            <div className="pt-2 border-t border-surface-5/60">
-              <p className="text-xs font-semibold text-ink-3 uppercase tracking-wider mb-3">Collaborateurs actifs</p>
+            <div className="pt-2 border-t border-slate-200/60">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Collaborateurs actifs</p>
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {collabs.filter(c => c.equipe === detailEquipe.id).length === 0
-                  ? <p className="text-xs text-ink-4 text-center py-4">Aucun collaborateur actif</p>
+                  ? <p className="text-xs text-slate-300 text-center py-4">Aucun collaborateur actif</p>
                   : collabs.filter(c => c.equipe === detailEquipe.id).map(c => (
                     <div key={c.id} className="flex items-center gap-2 py-1">
-                      <div className="w-6 h-6 rounded-full bg-brand-700/50 flex items-center justify-center shrink-0">
-                        <span className="text-[9px] font-bold text-brand-200">{c.prenom?.[0]}{c.nom?.[0]}</span>
+                      <div className="w-6 h-6 rounded-full bg-axa-dark/50 flex items-center justify-center shrink-0">
+                        <span className="text-[9px] font-bold text-white">{c.prenom?.[0]}{c.nom?.[0]}</span>
                       </div>
                       <div>
-                        <p className="text-xs font-medium text-ink-1">{c.prenom} {c.nom}</p>
-                        <p className="text-[10px] text-ink-4 font-mono">{c.matricule}</p>
+                        <p className="text-xs font-medium text-slate-800">{c.prenom} {c.nom}</p>
+                        <p className="text-[10px] text-slate-300 font-mono">{c.matricule}</p>
                       </div>
                     </div>
                   ))
@@ -328,10 +328,10 @@ export default function EquipesPage() {
       {toast && (
         <div className={clsx(
           'fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3',
-          'rounded-lg border shadow-card-lg animate-slide-up text-sm',
-          toast.type === 'success' ? 'bg-surface-2 border-green-500/30 text-green-300' : 'bg-surface-2 border-red-500/30 text-red-300'
+          'rounded-lg border shadow-lg animate-slide-up text-sm',
+          toast.type === 'success' ? 'bg-white border-success-border text-success shadow-md font-medium' : 'bg-white border-danger-border text-danger shadow-md font-medium'
         )}>
-          <span className={clsx('w-2 h-2 rounded-full', toast.type === 'success' ? 'bg-green-400' : 'bg-red-400')} />
+          <span className={clsx('w-2 h-2 rounded-full', toast.type === 'success' ? 'bg-success' : 'bg-danger')} />
           {toast.message}
         </div>
       )}
@@ -341,9 +341,9 @@ export default function EquipesPage() {
 
 function InfoItem({ label, value }) {
   return (
-    <div className="bg-surface-3 rounded-md p-3">
-      <p className="text-[10px] text-ink-4 uppercase tracking-wider mb-1">{label}</p>
-      <p className="text-sm font-medium text-ink-1">{value}</p>
+    <div className="bg-slate-50 rounded-md p-3">
+      <p className="text-[10px] text-slate-300 uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-sm font-medium text-slate-800">{value}</p>
     </div>
   )
 }

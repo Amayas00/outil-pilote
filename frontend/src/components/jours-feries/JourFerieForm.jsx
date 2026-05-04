@@ -76,20 +76,20 @@ export default function JourFerieForm({ initial, onSubmit, onCancel, loading }) 
       {/* Regions */}
       <fieldset className="space-y-3">
         <div className="flex items-center justify-between">
-          <legend className="text-xs font-semibold text-ink-3 uppercase tracking-wider">
+          <legend className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
             Régions concernées
           </legend>
           <span className={clsx(
             'text-xs px-2 py-0.5 rounded-full font-medium',
             allRegions
-              ? 'bg-brand-600/15 text-brand-300'
-              : 'bg-surface-4 text-ink-3'
+              ? 'bg-axa/15 text-axa'
+              : 'bg-slate-100 text-slate-400'
           )}>
             {allRegions ? 'Toutes les régions' : `${form.regions_ids.length} sélectionnée(s)`}
           </span>
         </div>
 
-        <p className="text-xs text-ink-4">
+        <p className="text-xs text-slate-300">
           Laissez tout décoché pour appliquer à toutes les régions.
         </p>
 
@@ -103,13 +103,13 @@ export default function JourFerieForm({ initial, onSubmit, onCancel, loading }) 
                   'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer',
                   'border transition-all duration-150',
                   checked
-                    ? 'bg-brand-600/10 border-brand-500/30 text-ink-1'
-                    : 'bg-surface-3 border-surface-5/60 text-ink-2 hover:bg-surface-4'
+                    ? 'bg-axa/10 border-axa/30 text-slate-800'
+                    : 'bg-slate-50 border-slate-200/60 text-slate-600 hover:bg-slate-100'
                 )}
               >
                 <div className={clsx(
                   'w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors',
-                  checked ? 'bg-brand-600 border-brand-600' : 'border-surface-5'
+                  checked ? 'bg-axa border-axa' : 'border-slate-300'
                 )}>
                   {checked && (
                     <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>

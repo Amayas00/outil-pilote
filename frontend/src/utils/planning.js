@@ -43,21 +43,22 @@ export function getCellEntry(index, collabId, iso, demiJournee) {
 }
 
 /** Return Tailwind bg + text classes from motif code */
-const MOTIF_STYLES = {
-  CONGE:           { bg: 'bg-green-500/20',  text: 'text-green-300',  dot: 'bg-green-400'  },
-  MALADIE:         { bg: 'bg-red-500/20',    text: 'text-red-300',    dot: 'bg-red-400'    },
-  TEMPS_PARTIEL:   { bg: 'bg-orange-500/20', text: 'text-orange-300', dot: 'bg-orange-400' },
-  MISSION:         { bg: 'bg-blue-500/20',   text: 'text-blue-300',   dot: 'bg-blue-400'   },
-  REUNION:         { bg: 'bg-purple-500/20', text: 'text-purple-300', dot: 'bg-purple-400' },
-  GESTION:         { bg: 'bg-amber-900/30',  text: 'text-amber-300',  dot: 'bg-amber-500'  },
-  PAS_AFFECTATION: { bg: 'bg-surface-5',     text: 'text-ink-3',      dot: 'bg-ink-4'      },
-  FORMATION:       { bg: 'bg-cyan-500/20',   text: 'text-cyan-300',   dot: 'bg-cyan-400'   },
-  VISITE:          { bg: 'bg-rose-500/20',   text: 'text-rose-300',   dot: 'bg-rose-400'   },
-  OFIS:            { bg: 'bg-slate-600/20',  text: 'text-slate-300',  dot: 'bg-slate-400'  },
+const MOTIF_COLORS = {
+  CONGE:           { hex: '#16A34A', bg: '#F0FAF4' },
+  MALADIE:         { hex: '#DC2626', bg: '#FFF5F5' },
+  TEMPS_PARTIEL:   { hex: '#EA580C', bg: '#FFF7ED' },
+  MISSION:         { hex: '#00008F', bg: '#E6E6FF' },
+  REUNION:         { hex: '#9333EA', bg: '#FAF5FF' },
+  GESTION:         { hex: '#B45309', bg: '#FFFBEB' },
+  PAS_AFFECTATION: { hex: '#64748B', bg: '#F8FAFC' },
+  FORMATION:       { hex: '#0891B2', bg: '#ECFEFF' },
+  VISITE:          { hex: '#E11D48', bg: '#FFF1F2' },
+  OFIS:            { hex: '#475569', bg: '#F1F5F9' },
 }
 
 export function getMotifStyle(code) {
-  return MOTIF_STYLES[code] || { bg: 'bg-surface-4', text: 'text-ink-2', dot: 'bg-ink-3' }
+  const c = MOTIF_COLORS[code] || { hex: '#64748B', bg: '#F8FAFC' }
+  return { hex: c.hex, bg: `bg-[${c.bg}]`, dot: '', hexBg: c.bg }
 }
 
 export function formatWeekLabel(weekNum, year) {
