@@ -1,22 +1,145 @@
-# Outil Pilote — Planning & Workforce Management
+# Outil Pilote — Planning RH
 
-Application fullstack de gestion de planning RH permettant aux équipes de souscription de visualiser et piloter les affectations de leurs collaborateurs sur une grille de 40 semaines avec granularité demi-journée (AM/PM).
-
-> **Compte admin par défaut :** `admin@test.com` / `admin1234`
+Application fullstack de pilotage des plannings collaborateurs pour les équipes de souscription AXA.
+Développée dans le cadre d'un test technique Développeur Fullstack.
 
 ---
 
 ## Stack technique
 
-| Côté | Technologie |
-|------|------------|
-| Backend | Django 6, Django REST Framework, JWT (simplejwt) |
-| Base de données | SQLite (dev) / PostgreSQL (prod) |
-| Frontend | React 18, Vite, Tailwind CSS 3 |
-| Data fetching | TanStack Query v5 |
-| HTTP client | Axios avec auto-refresh JWT |
-| Dates | date-fns v3 |
-| Routing | React Router v7 |
+| Couche | Technologie | Version |
+|--------|------------|---------|
+| Backend | Django + Django REST Framework | 6.x / 3.15+ |
+| Auth | djangorestframework-simplejwt | 5.3+ |
+| Base de données | SQLite (dev) · PostgreSQL (prod) | — |
+| Frontend | React + Vite | 18 / 6+ |
+| Styles | Tailwind CSS | 3 |
+| Data fetching | TanStack Query | v5 |
+| HTTP | Axios avec auto-refresh JWT | — |
+| Dates | date-fns | v3 |
+| Routing | React Router | v7 |
+| Tests | pytest-django | 67 tests |
+
+---
+
+## Prérequis
+
+- Python 3.11+
+- Node.js 18+
+- npm 9+
+
+---
+
+## Installation
+
+### 1. Backend
+
+```bash
+cd backend
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py loaddata teams/fixtures/initial_data.json
+python manage.py loaddata planning/fixtures/motifs.json
+python manage.py runserver
+```
+
+Le serveur démarre sur **http://localhost:8000**
+
+### 2. Frontend
+
+```bash
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
+```
+
+L'application démarre sur **http://localhost:5173**
+
+> Les deux serveurs doivent tourner en parallèle.
+
+### 3. Créer le compte administrateur
+
+```bash
+cd backend
+python manage.py shell
+```
+
+```python
+from accounts.models import User
+
+User.objects.create_superuser(
+    email='votre.email@axa.fr',
+    password='votre_mot_de_passe',
+    role='admin'
+)
+```
+
+Connectez-vous sur http://localhost:5173 avec ces identifiants.
+
+### 4. Créer des données de test
+
+Pour tester tous les niveaux de droits, ouvrez un shell Django :
+
+```bash
+cd backend
+python manage.py shell
+```
+
+Une fois dans le shell, copiez-collez ce script :
+
+```python
+from accounts.models import User
+from teams.models import Region, Domaine, Equipe
+from teams.services import creer_collaborateur
+from datetime import date
+
+# Équipe
+region = Region.objects.get(nom='Ile-de-France')
+domaine = Domaine.objects.get(nom='automobile')
+equipe = Equipe.objects.create(
+    nom='Souscription Auto Paris',
+    region=region,
+    domaine=domaine
+)
+
+# Collaborateur 1
+u1 = User.objects.create_user(email='jean.dupont@axa.fr', password='test1234', role='collaborateur')
+creer_collaborateur(matricule='EMP-001', nom='Dupont', prenom='Jean',
+                    equipe=equipe, date_entree=date(2024, 1, 15), user=u1)
+
+# Collaborateur 2
+u2 = User.objects.create_user(email='marie.martin@axa.fr', password='test1234', role='collaborateur')
+creer_collaborateur(matricule='EMP-002', nom='Martin', prenom='Marie',
+                    equipe=equipe, date_entree=date(2024, 3, 1), user=u2)
+
+# Manager
+u3 = User.objects.create_user(email='paul.bernard@axa.fr', password='test1234', role='manager')
+creer_collaborateur(matricule='EMP-003', nom='Bernard', prenom='Paul',
+                    equipe=equipe, date_entree=date(2023, 9, 1), user=u3)
+
+print("OK — données de test créées")
+```
+
+Vous disposez ensuite de 4 comptes pour tester :
+
+| Email | Mot de passe | Rôle |
+|-------|-------------|------|
+| votre.email@axa.fr | votre choix | Administrateur |
+| jean.dupont@axa.fr | test1234 | Collaborateur |
+| marie.martin@axa.fr | test1234 | Collaborateur |
+| paul.bernard@axa.fr | test1234 | Manager |
+
+---
+
+## Lancer les tests
+
+```bash
+cd backend
+python -m pytest tests/ -v
+```
+
+67 tests couvrant : authentification JWT, contrainte unique planning, permissions par rôle, restrictions de date, motifs restreints, changement d'équipe, traçabilité historique, jours fériés.
 
 ---
 
@@ -25,124 +148,53 @@ Application fullstack de gestion de planning RH permettant aux équipes de sousc
 ```
 outil_pilote/
 ├── backend/
-│   ├── accounts/              # User custom, auth JWT, permissions
-│   ├── teams/                 # Region, Domaine, Equipe, Collaborateur
-│   │   └── services.py        # changer_equipe(), creer_collaborateur()
-│   ├── planning/              # Motif, PlanningEntry, HistoriqueModification
-│   ├── calendar_app/          # JourFerie, JourFerieRegion
-│   ├── config/                # settings.py, urls.py
+│   ├── accounts/          # User custom (email), JWT, permissions
+│   ├── teams/             # Region, Domaine, Equipe, Collaborateur
+│   │   └── services.py    # changer_equipe(), creer_collaborateur()
+│   ├── planning/          # Motif, PlanningEntry, HistoriqueModification
+│   ├── calendar_app/      # JourFerie, JourFerieRegion
+│   ├── config/            # settings.py, urls.py
+│   ├── tests/             # 67 tests automatisés
 │   └── requirements.txt
+│
 └── frontend/
     └── src/
+        ├── assets/        # axa-logo.png
         ├── components/
-        │   ├── ui/            # Button, Input, Modal, Table, Badge, ActionMenu…
-        │   ├── layout/        # AppLayout, Sidebar, TopBar
-        │   ├── planning/      # PlanningGrid, PlanningFilters, CellContextMenu
+        │   ├── ui/        # Button, Input, Modal, Table, Badge...
+        │   ├── layout/    # AppLayout, Sidebar, TopBar
+        │   ├── planning/  # PlanningGrid, PlanningFilters
         │   ├── collaborateurs/
-        │   └── equipes/
-        ├── context/           # AuthContext (session JWT)
-        ├── hooks/             # useCollaborateurs, useEquipes, useJoursFeries…
-        ├── pages/             # LoginPage, DashboardPage, PlanningPage…
-        ├── services/          # api.js — Axios + auto-refresh token
-        ├── styles/            # globals.css — design system tokens
-        └── utils/             # planning.js — buildWeekRange, indexEntries
-```
-
----
-
-## Installation
-
-### Prérequis
-
-- Python 3.11+
-- Node.js 18+
-- npm 9+
-
-### Backend Django
-
-```bash
-cd backend
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py loaddata teams/fixtures/initial_data.json planning/fixtures/motifs.json
-python manage.py runserver
-# → http://localhost:8000
-```
-
-Le compte admin est créé automatiquement par le script de setup :
-- Email : `admin@test.com`
-- Mot de passe : `admin1234`
-
-Pour créer un superutilisateur manuellement :
-
-```bash
-python manage.py createsuperuser
-```
-
-### Frontend React
-
-```bash
-cd frontend
-cp .env.example .env
-npm install
-npm run dev
-# → http://localhost:5173
-```
-
-Les deux serveurs doivent tourner simultanément.
-
-### Variables d'environnement
-
-**Frontend** — fichier `frontend/.env` :
-
-```env
-VITE_API_URL=http://localhost:8000/api/v1
-```
-
-**Backend** — à externaliser en production :
-
-```env
-SECRET_KEY=votre-cle-secrete-longue-et-aleatoire
-DEBUG=False
-ALLOWED_HOSTS=votre-domaine.com
+        │   ├── equipes/
+        │   └── jours-feries/
+        ├── context/       # AuthContext — session JWT
+        ├── hooks/         # useCollaborateurs, useEquipes, useJoursFeries
+        ├── pages/         # LoginPage, DashboardPage, PlanningPage...
+        ├── services/      # api.js — Axios + auto-refresh
+        ├── styles/        # globals.css — design system AXA
+        └── utils/         # planning.js — buildWeekRange, indexEntries
 ```
 
 ---
 
 ## API REST
 
-Tous les endpoints sont préfixés par `/api/v1/`.
+Préfixe : `/api/v1/`
 
-### Authentification
+### Auth
 
-| Méthode | Endpoint | Description | Droits |
-|---------|----------|-------------|--------|
-| POST | `/auth/login/` | Login → `access` + `refresh` + `user` | Public |
-| POST | `/auth/refresh/` | Rafraîchir le token d'accès | Public |
-| GET | `/auth/me/` | Profil de l'utilisateur connecté | Auth |
-
-**Payload de login :**
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/auth/login/` | Login → access + refresh + user |
+| POST | `/auth/refresh/` | Rafraîchir le token |
+| GET | `/auth/me/` | Profil connecté |
 
 ```json
-{
-  "email": "admin@test.com",
-  "password": "admin1234"
-}
-```
+// POST /auth/login/
+{ "email": "...", "password": "..." }
 
-**Réponse 200 :**
-
-```json
-{
-  "access": "eyJ...",
-  "refresh": "eyJ...",
-  "user": {
-    "id": 1,
-    "email": "admin@test.com",
-    "role": "admin",
-    "nom_complet": "Admin"
-  }
-}
+// Réponse
+{ "access": "eyJ...", "refresh": "eyJ...", "user": { "role": "admin", ... } }
 ```
 
 ### Équipes & Collaborateurs
@@ -162,29 +214,12 @@ Tous les endpoints sont préfixés par `/api/v1/`.
 
 | Méthode | Endpoint | Description |
 |---------|----------|-------------|
-| GET | `/planning/` | Grille planning filtrée |
-| POST | `/planning/entry/` | Upsert une entrée (créer ou modifier) |
-| DELETE | `/planning/entry/{id}/` | Supprimer une entrée |
-| POST | `/planning/bulk/` | Saisie en masse multi-jours |
-| GET | `/planning/historique/` | Historique des modifications |
-| GET | `/motifs/` | Référentiel des motifs |
-
-**Paramètres de la grille planning :**
-
-```
-GET /api/v1/planning/?date_debut=2025-01-01&date_fin=2025-03-31&region=1&equipe=2
-```
-
-**Upsert d'une entrée :**
-
-```json
-{
-  "collaborateur": 5,
-  "jour": "2025-06-15",
-  "demi_journee": "AM",
-  "motif": 1
-}
-```
+| GET | `/planning/` | Grille avec filtres |
+| POST | `/planning/entry/` | Upsert — créer ou modifier |
+| DELETE | `/planning/entry/{id}/` | Supprimer |
+| POST | `/planning/bulk/` | Saisie en masse |
+| GET | `/planning/historique/` | Audit trail |
+| GET | `/motifs/` | 10 motifs paramétrables |
 
 ### Calendrier
 
@@ -192,38 +227,6 @@ GET /api/v1/planning/?date_debut=2025-01-01&date_fin=2025-03-31&region=1&equipe=
 |---------|----------|--------|
 | GET/POST | `/jours-feries/` | Auth / Admin |
 | GET/PATCH/DELETE | `/jours-feries/{id}/` | Admin |
-
----
-
-## Modèle de données
-
-### Décisions d'architecture clés
-
-- **User ≠ Collaborateur** — un admin peut exister sans `Collaborateur` associé. Un `Collaborateur` archivé peut ne plus avoir de `User` actif.
-- **Rôle centralisé dans `User.role`** — pas de duplication dans `Collaborateur`.
-- **Région déduite** — `collaborateur.equipe.region` (pas de `region_id` redondant sur `Collaborateur`).
-- **Dénormalisation délibérée** — `Collaborateur.equipe_id` est un champ de lecture rapide. La vérité historique vit dans `AffectationCollaborateur`. Toute modification passe obligatoirement par `services.changer_equipe()`.
-- **Soft delete partout** — flags `actif` / `active` sur toutes les entités métier. Aucune suppression physique.
-
-### Contraintes d'intégrité
-
-| Table | Contrainte |
-|-------|-----------|
-| `PlanningEntry` | `UNIQUE(collaborateur_id, jour, demi_journee)` |
-| `AffectationCollaborateur` | `UNIQUE(collaborateur_id) WHERE date_fin IS NULL` |
-| `AffectationCollaborateur` | `CHECK(date_fin > date_debut)` |
-| `Collaborateur` | `CHECK(date_sortie > date_entree)` |
-| `JourFerieRegion` | PK composite `(jour_ferie_id, region_id)` |
-
-### Index de performance
-
-| Table | Index | Requête couverte |
-|-------|-------|-----------------|
-| `PlanningEntry` | `(collaborateur_id, jour)` | Grille planning sur une période |
-| `PlanningEntry` | `(jour, motif_id)` | Agrégats par motif |
-| `AffectationCollaborateur` | `(collaborateur_id, date_debut)` | Historique chronologique |
-| `HistoriqueModification` | `(collaborateur_id, date_modif)` | Audit trail |
-| `Collaborateur` | `(equipe_id, actif)` | Filtrage équipe dans la grille |
 
 ---
 
@@ -241,92 +244,73 @@ GET /api/v1/planning/?date_debut=2025-01-01&date_fin=2025-03-31&region=1&equipe=
 | Gérer les jours fériés | ❌ | ❌ | ✅ |
 | Changer l'équipe d'un collaborateur | ❌ | ❌ | ✅ |
 
-> Les permissions sont enforced **côté backend** (DRF). Le frontend effectue des redirections préventives mais ne remplace pas la sécurité backend.
+Les permissions sont enforced **côté backend** (DRF). Le frontend effectue des redirections préventives.
 
 ---
 
 ## Motifs de planning
 
-| Code | Libellé | Accessible au collaborateur |
+| Code | Libellé | Saisie collaborateur |
 |------|---------|:---:|
-| `CONGE` | Congés | ✅ |
-| `MALADIE` | Maladie | ✅ |
-| `TEMPS_PARTIEL` | Temps partiel / Alternance | ✅ |
-| `FORMATION` | Formation | ✅ |
-| `MISSION` | Mission | ❌ |
-| `REUNION` | Réunion | ❌ |
-| `GESTION` | Gestion | ❌ |
-| `VISITE` | Visite | ❌ |
-| `OFIS` | OFIS | ❌ |
-| `PAS_AFFECTATION` | Pas d'affectation | ❌ |
+| CONGE | Congés | ✅ |
+| MALADIE | Maladie | ✅ |
+| TEMPS_PARTIEL | Temps partiel / Alternance | ✅ |
+| FORMATION | Formation | ✅ |
+| MISSION | Mission | ❌ |
+| REUNION | Réunion | ❌ |
+| GESTION | Gestion | ❌ |
+| VISITE | Visite | ❌ |
+| OFIS | OFIS | ❌ |
+| PAS_AFFECTATION | Pas d'affectation | ❌ |
 
 ---
 
-## Frontend — Composants UI
+## Modèle de données — points clés
 
-Tous les composants sont dans `src/components/ui/` et suivent le design system "Refined Slate" défini dans `tailwind.config.js`.
+**Séparation User / Collaborateur** — `User` gère l'authentification, `Collaborateur` représente la personne dans l'organigramme. Le lien est nullable dans les deux sens.
 
-| Composant | Usage |
-|-----------|-------|
-| `Button` | Variantes : `primary`, `secondary`, `ghost`, `danger` — tailles : `xs`, `sm`, `md`, `lg` |
-| `Input` | Label, message d'erreur, hint, icône gauche |
-| `Select` | Même API qu'Input |
-| `Modal` | Portal React, fermeture Escape, scroll lock, backdrop |
-| `Table` | `Table`, `Thead`, `Th`, `Tbody`, `Tr`, `Td`, `TableSkeleton`, `TableEmpty` |
-| `ActionMenu` | Menu contextuel avec portal et positionnement auto viewport |
-| `ConfirmDialog` | Dialog de confirmation avec variante danger |
-| `Badge` | Variantes colorées avec dot optionnel |
-| `Skeleton` | Placeholders de chargement animés |
-| `Tooltip` | 4 directions, sans dépendance externe |
-| `SearchInput` | Input de recherche avec icône intégrée |
-| `Spinner` | Indicateur de chargement, 3 tailles |
+**Rôle dans User uniquement** — pas de duplication dans `Collaborateur`. La région se déduit via `collaborateur.equipe.region`.
 
----
+**Dénormalisation documentée** — `Collaborateur.equipe_id` est un champ de lecture rapide. La vérité historique est dans `AffectationCollaborateur`. Toute modification passe par `services.changer_equipe()`.
 
-## Grille Planning — Implémentation
+**Contraintes BDD principales :**
 
-La grille est le composant central de l'application (`src/components/planning/PlanningGrid.jsx`).
+| Table | Contrainte |
+|-------|-----------|
+| `PlanningEntry` | `UNIQUE(collaborateur_id, jour, demi_journee)` |
+| `AffectationCollaborateur` | `UNIQUE(collaborateur_id) WHERE date_fin IS NULL` |
+| `AffectationCollaborateur` | `CHECK(date_fin > date_debut)` |
+| `Collaborateur` | `CHECK(date_sortie > date_entree)` |
 
-**Performances :**
-- `indexEntries()` construit un dictionnaire `"collabId-date-dj" → entry` avant le rendu — lookup O(1) par cellule.
-- Les colonnes collaborateur utilisent `sticky left-0` en CSS natif.
-- Les deux rangées d'en-têtes sont sticky en cascade (`top-0` / `top-[33px]`).
-
-**Interactions :**
-- Clic sur une cellule → context menu avec liste des motifs filtrés selon le rôle.
-- Clic sur un motif → mutation TanStack Query avec `invalidateQueries` automatique.
-- Les motifs avec `visible_collaborateur = false` sont masqués pour les collaborateurs standard.
+**Audit trail résistant** — `HistoriqueModification.planning_entry` est `SET NULL` : l'historique survit à la suppression d'une entrée planning.
 
 ---
 
-## Lancer les tests
+## Hypothèses fonctionnelles
 
-```bash
-# Backend (à implémenter)
-cd backend
-pip install pytest pytest-django
-pytest
+- **Login par email** — choix standard moderne, le cahier des charges ne précise pas le format.
+- **Soft delete universel** — aucune suppression physique, les entités désactivées restent dans l'historique.
+- **Jours fériés non bloquants** — affichés visuellement dans la grille mais la saisie reste possible si nécessaire.
+- **Upsert planning** — un second POST sur le même slot met à jour le motif plutôt que retourner une erreur 400.
 
-# Frontend (à implémenter)
-cd frontend
-npm run test
+---
+
+## Pistes d'amélioration
+
+- Saisie en masse par sélection multi-cellules
+- Export planning PDF ou Excel
+- Page historique dédiée avec filtres
+- Gestion des comptes utilisateurs depuis l'UI
+- Tests frontend avec Vitest + Testing Library
+- Migration vers PostgreSQL pour les contraintes d'exclusion avancées
+- Variables d'environnement Django avec `python-decouple`
+
+---
+
+## Variable d'environnement
+
+**`frontend/.env`**
+```env
+VITE_API_URL=http://localhost:8000/api/v1
 ```
 
----
-
-## Améliorations possibles
-
-- **Tests backend** — pytest-django sur les règles métier (contrainte unique planning, permissions, dates)
-- **Tests frontend** — Vitest + Testing Library sur les composants critiques
-- **Page historique** — qui a modifié quoi et quand sur le planning
-- **Gestion des comptes** — lier `User` à `Collaborateur` depuis l'UI admin
-- **Export planning** — PDF ou Excel sur la période affichée
-- **Saisie en masse** — sélection multi-cellules et application d'un motif en un clic
-- **PostgreSQL** — activer les contraintes `EXCLUDE` pour les chevauchements d'affectation
-- **Variables d'environnement** — externaliser `SECRET_KEY` dans un `.env` Django
-
----
-
-## Auteur
-
-Projet réalisé dans le cadre d'un test technique fullstack Django + React.
